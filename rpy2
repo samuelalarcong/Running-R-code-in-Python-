@@ -1,0 +1,47 @@
+# Using the special package: https://rpy2.github.io/
+import os
+os.environ['R_HOME'] = r'C:\Program Files\R\R-4.4.1'
+
+import rpy2.robjects as ro
+
+
+os.environ['R_HOME'] = r'C:\Program Files\RR-4.4.1'
+os.environ['PATH'] = r'C:\Program Files\RR-4.4.1\bin\x64' + ';' + os.environ['PATH']
+
+import rpy2.robjects as robjects
+from rpy2.robjects.packages import importr
+from rpy2.robjects import r, pandas2ri
+
+# Activate the automatic conversion of pandas objects to R objects and vice versa
+pandas2ri.activate()
+
+# R code
+r_code = """
+library(glmnet)
+
+# Set seed for reproducibility
+set.seed(42)
+
+# Simulate data (equivalent to Python's make_regression)
+n <- 100
+p <- 20
+X <- matrix(rnorm(n * p), n, p)
+beta <- rep(0, p)
+beta[c(1, 5, 10)] <- 1  # True coefficients
+epsilon <- rnorm(n)
+y <- X %*% beta + epsilon  # True model with noise
+
+# Fit Elastic Net model using glmnet
+fit <- glmnet(X, y, alpha = 1)  # alpha = 1 for Lasso (L1) penalty
+
+y
+"""
+
+# Execute the R code
+robjects.r(r_code)
+
+# Retrieve the value of y from the R environment
+y = robjects.r['y']
+
+
+print(y)
